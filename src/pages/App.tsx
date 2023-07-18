@@ -1,81 +1,51 @@
-import {useState} from 'react'
-import {Task} from "../types/task.ts";
-import Form from "../components/form.tsx";
-import List from "../components/list.tsx";
-import StopWatch from "../components/stopwatch.tsx";
-import styled from "styled-components";
-
-const StyledApp = styled.div`
-  display: grid;
-  grid-template-rows: min-content min-content auto;
-  grid-template-areas: 
-    "new-task"
-    "stopwatch"
-    "tasks";
-  row-gap: 24px;
-  min-width: 320px;
-  min-height: calc(100vh - 32px);
-  width: 100%;
-  padding: 32px;
-  box-sizing: border-box;
-  border-radius: 10px;
-  background-color: #171717;
-
-  @media screen and (min-width: 1280px) {
-    grid-template-areas: 
-      "new-task tasks"
-      "stopwatch tasks";
-    column-gap: 64px;
-    grid-template-rows: min-content min-content;
-    grid-template-columns: 750px 300px;
-    justify-content: center;
-    align-content: center;
-    padding: 64px;
-  }
-`;
+import Cronometro from '../components/Cronometro';
+import Formulario from '../components/Formulario';
+import Lista from '../components/Lista';
+import {Tarefa} from '../types/tarefa';
+import style from './App.module.scss';
+import {useState} from "react";
 
 function App() {
+    const [tarefas, setTarefas] = useState<Tarefa[]>([]);
+    const [selecionado, setSelecionado] = useState<Tarefa>();
 
-    const [task, setTasks] = useState<Task[]>([]);
-    const [selected, setSelected] = useState<Task>();
-
-    function selectTask(selectedTask: Task) {
-        setSelected(selectedTask);
-        setTasks(previousTasks => previousTasks.map(task => ({
-            ...task,
-            selected: task.id === selectedTask.id ? true : false
+    function selecionaTarefa(tarefaSelecionada: Tarefa) {
+        setSelecionado(tarefaSelecionada);
+        setTarefas(tarefasAnteriores => tarefasAnteriores.map(tarefa => ({
+            ...tarefa,
+            selecionado: tarefa.id === tarefaSelecionada.id ? true : false
         })))
     }
 
-    function fisishTask() {
-        if (selected) {
-            setSelected(undefined);
-            setTasks(previousTasks => previousTasks.map(task => {
-                if (task.id === selected.id) {
+    function finalizarTarefa() {
+        if (selecionado) {
+            setSelecionado(undefined);
+            setTarefas(tarefasAnteriores => tarefasAnteriores.map(tarefa => {
+                if (tarefa.id === selecionado.id) {
                     return {
-                        ...task,
-                        selected: false,
-                        completed: true
+                        ...tarefa,
+                        selecionado: false,
+                        completado: true
                     }
                 }
-                return task;
+                return tarefa;
             }))
         }
     }
 
     return (
-        <StyledApp>
-            <Form setTasks={setTasks}/>
-            <List
-                tasks={task}
-                selectTask={selectTask}
+        <div className={style.AppStyle}>
+            <Formulario setTarefas={setTarefas}/>
+            <Lista
+                tarefas={tarefas}
+                selecionaTarefa={selecionaTarefa}
             />
-            <StopWatch
-                selected={selected}
-                fisishTask={fisishTask}
+            <Cronometro
+                selecionado={selecionado}
+                finalizarTarefa={finalizarTarefa}
             />
-        </StyledApp>
+        </div>
     );
 }
 
-export default App
+export default App;
